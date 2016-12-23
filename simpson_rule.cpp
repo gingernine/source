@@ -24,8 +24,7 @@ double simpson(double lower,double upper, double error){
 	int n = (int)pow( 1/error * pow(upper-lower, 5) / 2880, 0.25);
     double delta = (upper - lower) / (2*n);
     double sum;
-    int i;
-    for(i=1; i<=n; i++){
+    for(int i=1; i<=n; i++){
         sum += f(lower + delta * (2*i-2), alpha)
         		+ 4 * f(lower + delta * (2*i-1), alpha)
 				+ f(lower + delta * 2*i, alpha);
