@@ -16,7 +16,7 @@ double f(double x, double alpha){
 }
 
 /* integration interval */
-const double x0 = 0.0000001; // x0を０としないのは、xが０の時に発散するため
+const double x0 = 0.0000001;
 const double x_max = 100000.0;
 
 /* simpson rule */
