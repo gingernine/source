@@ -66,7 +66,7 @@ double simpson(int n, double lower,double upper, double error, int r, double lam
     }
     return (f_lower + 2*sum_e + 4*sum_o + f_upper) * delta / 3.0;
 }
-
+/*
 int main() {
     cout << "Hello C++ World" << endl;
     double res;
@@ -83,3 +83,4 @@ int main() {
     cout << res << endl;
     return 0;
 }
+*/
