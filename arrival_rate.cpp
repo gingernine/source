@@ -46,7 +46,7 @@ double* calc_arrival_rate(vector<string> time_vector, int interval) {
 	}
 	return retvec;
 }
-
+/*
 int main() {
 
 	string maindir = "C:\\Users\\kklab\\Desktop\\yurispace\\board_fluctuation\\src\\nikkei_needs_output";
@@ -94,3 +94,4 @@ int main() {
 	}
 	return 0;
 }
+*/
