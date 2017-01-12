@@ -109,6 +109,11 @@ public:
 	    return exp(-x[0]) * pow(x[0], x[1]-1);
 	}
 
+	inline static double term_by_term() {
+		double sum;
+		return sum;
+	}
+
 	inline static double gauss_legendre(double (*func)(double *x), double lower, double upper, int n, int len, ...) {
 		/*
 		 * trapezoidal rule
