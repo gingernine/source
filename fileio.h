@@ -26,6 +26,14 @@ public:
 		ss >> ret;
 		return ret;
 	}
+
+	static double stod(string str) {
+		double ret=0.0;
+		stringstream ss;
+		ss.str(str);
+		ss >> ret;
+		return ret;
+	}
 };
 
 class Fileio {
