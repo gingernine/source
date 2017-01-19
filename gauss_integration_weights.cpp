@@ -26,6 +26,7 @@ int main() {
 			cout << fixed << setprecision(40) << fio.split(*itr, ',').at(1) << endl;
 		}
 	}
+
 	return 0;
 }
 
