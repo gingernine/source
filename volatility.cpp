@@ -59,6 +59,12 @@ double calc_prob(vector<int> pattern, double p_UU, double p_UD, double p_DU, dou
 
 int main() {
 
+	int m=0;
+	for (int i=1; i<1; i++){
+		m++;
+	}
+	cout << m << endl;
+	/*
 	string rootpath = "C:\\Users\\kklab\\Desktop\\yurispace\\board_fluctuation\\src\\nikkei_needs_output";
 	string subdir = "\\statistics_of_the_limit_order_book\\move_frequency";
 	string datayear = "\\2007";
@@ -117,5 +123,6 @@ int main() {
 			}
 		}
 	}
+	*/
 	return 0;
 }
