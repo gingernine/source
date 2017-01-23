@@ -10,6 +10,7 @@
 #include <numeric>
 #include <cmath>
 #include <float.h>
+#include <fstream>
 #include "myMath.h"
 
 using namespace std;
@@ -76,9 +77,11 @@ double realized_volatility(double timeint, string filepath, bool usequote) {
 			+ fio.split(*itr, ',').at(1).substr(6,2));
 	timestamp += timeint;
 	if (usequote) {
-		++itr;
+		while (fio.split(*itr, ',').at(2) != tqjudge) {
+			++itr;
+			k++;
+		}
 		vallntmp = log((im.stod(fio.split(*itr, ',').at(5)) + im.stod(fio.split(*itr, ',').at(7))) * 0.5);
-		k=1;
 	} else {
 		tqjudge = "Trade";
 		vallntmp = log(im.stod(fio.split(*itr, ',').at(3)));
@@ -95,7 +98,6 @@ double realized_volatility(double timeint, string filepath, bool usequote) {
 			while(fio.split(*itr, ',').at(2) != tqjudge) {
 				--itr;
 			}
-			cout << *itr << endl;
 			if (usequote) {
 				valln = log((im.stod(fio.split(*itr, ',').at(5)) + im.stod(fio.split(*itr, ',').at(7))) * 0.5);
 			} else {
@@ -128,16 +130,31 @@ double realized_volatility(double timeint, string filepath, bool usequote) {
 	return rv;
 }
 
+double startval(string filepath, bool usequote) {
+	vector<string> series = fio.readcsv(filepath, false);
+	vector<string>::iterator itr=series.begin();
+
+	if (usequote) {
+		while (fio.split(*itr, ',').at(2) != "Quote") {
+			++itr;
+		}
+		return (im.stod(fio.split(*itr, ',').at(5)) + im.stod(fio.split(*itr, ',').at(7))) * 0.5;
+	} else {
+		return im.stod(fio.split(*itr, ',').at(3));
+	}
+}
+
 int main() {
 
+	string unit = "30";
 	string rootpath = "C:\\Users\\kklab\\Desktop\\yurispace\\board_fluctuation\\src\\nikkei_needs_output";
 	string subdir = "\\statistics_of_the_limit_order_book\\move_frequency";
 	string datayear = "\\2007";
 	string sessions[2] = { "\\morning", "\\afternoon" };
 	string dirpath = rootpath + subdir + datayear;
 
-	string filepath, session, date, rowdate;
-	vector<string> data, probmat;
+	string filepath, session, date, rowdate, wfilepath;
+	vector<string> data, probmat, expects;
 	double p_UU, p_UD, p_DU, p_DD, prob, EX, VX;
 	int T, up, down, N;
 
@@ -147,43 +164,64 @@ int main() {
 		data = fio.readcsv(filepath, false);
 		vector<double> table(2, 0.0); //期待値と分散を計算する．
 
+		//ofstream ofs((dirpath + session + "_" + unit + "unit_volatility.csv").c_str());
+
 		for (vector<string>::iterator itr=data.begin(); itr!=data.end(); ++itr) {
 			vector<double> vec(2, 0.0);
 			date = fio.split(*itr, ',').at(0);
 			cout << date << session << endl;
-			filepath = "C:\\Users\\kklab\\Desktop\\yurispace\\integration_cpp\\source\\2007\\probability_10pieces.csv"; //確率を取得する．
+			filepath = "C:\\Users\\kklab\\Desktop\\yurispace\\integration_cpp\\source" + datayear + "\\probability2_" + unit + "pieces.csv"; //確率を取得する．
 			probmat = fio.readcsv(filepath, true);
+			filepath = "C:\\Users\\kklab\\Desktop\\yurispace\\integration_cpp\\source" + datayear + "\\Expectations_" + unit + "pieces.csv"; //変動回数を取得する．
+			expects = fio.readcsv(filepath, true);
 			rowdate = date.substr(1,4) + "/" + date.substr(5,2) + "/" +date.substr(7,2) + "/" + session.substr(1);
-
+			vector<string>::iterator itr3 = expects.begin();
 			for (vector<string>::iterator itr2=probmat.begin(); itr2!=probmat.end(); ++itr2) {
 				if (fio.split(*itr2, ',').at(0) == rowdate) {
 					p_UU = im.stod(fio.split(*itr2, ',').at(1));
 					p_UD = im.stod(fio.split(*itr2, ',').at(2));
 					p_DU = im.stod(fio.split(*itr2, ',').at(3));
 					p_DD = im.stod(fio.split(*itr2, ',').at(4));
+					T = im.stoi(fio.split(*itr3, ',').at(3));
 					break;
 				}
-			}
-			T=0;
-			for (int p=1; p<fio.split(*itr, ',').size(); p++) {
-				T += im.stoi(fio.split(*itr, ',').at(p)); // 変動回数
+				++itr3;
 			}
 			EX=0.0;
 			VX=0.0;
-			double B = 17000.0;
+			double start = startval(rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", false);
 			for (N=-T; N<=T; N+=2) {
 				up = (T+N)/2;
 				down = (T-N)/2;
 				prob = calc_prob(up, down, p_UU, p_UD, p_DU, p_DD);
-				EX += (log(B + 10.0*N) - log(B)) * prob;
-				VX += (log(B + 10.0*N) - log(B)) * (log(B + 10.0*N) - log(B)) * prob;
+				EX += (log(start + 10.0*N) - log(start)) * prob;
+				VX += (log(start + 10.0*N) - log(start)) * (log(start + 10.0*N) - log(start)) * prob;
 			}
 			VX = VX - EX * EX;
-			cout << "VX = " << VX << endl;
-			cout << "RV = "
+
+			/*ofs << rowdate
+				<< ","
+				<< VX
+				<< ","
 				<< realized_volatility(60.0,
-						rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", false)
-				<< endl;
+					rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", false)
+				<< ","
+				<< realized_volatility(300.0,
+					rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", false)
+				<< ","
+				<< realized_volatility(600.0,
+					rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", false)
+				<< ","
+				<< realized_volatility(60.0,
+					rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", true)
+				<< ","
+				<< realized_volatility(300.0,
+					rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", true)
+				<< ","
+				<< realized_volatility(600.0,
+					rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", true)
+				<<
+				endl;*/
 		}
 	}
 	return 0;

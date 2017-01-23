@@ -17,7 +17,7 @@ Functions F;
 /* integration interval */
 const double x0 = 1e-10;
 const double x_max = 100000.0;
-const int n = 100;
+const int n = 500;
 
 /* the density function of operating time */
 inline double operating_time(double *x) {
