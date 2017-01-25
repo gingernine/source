@@ -147,7 +147,7 @@ double startval(string filepath, bool usequote) {
 int main() {
 
 	string unit = "30";
-	bool observed = true;
+	bool observed = false;
 	string rootpath = "C:\\Users\\kklab\\Desktop\\yurispace\\board_fluctuation\\src\\nikkei_needs_output";
 	string subdir = "\\statistics_of_the_limit_order_book\\move_frequency";
 	string datayear = "\\2007";
@@ -165,7 +165,7 @@ int main() {
 		data = fio.readcsv(filepath, false);
 		vector<double> table(2, 0.0); //期待値と分散を計算する．
 
-		ofstream ofs((dirpath + session + "_" + unit + "unit_volatility_observed.csv").c_str());
+		ofstream ofs((dirpath + session + "_" + unit + "unit_volatility.csv").c_str());
 
 		for (vector<string>::iterator itr=data.begin(); itr!=data.end(); ++itr) {
 			vector<double> vec(2, 0.0);
@@ -174,7 +174,7 @@ int main() {
 			if (observed) {
 				filepath = "C:\\Users\\kklab\\Desktop\\yurispace\\integration_cpp\\source" + datayear + "\\probability_observed.csv"; //確率を取得する．
 			} else {
-				filepath = "C:\\Users\\kklab\\Desktop\\yurispace\\integration_cpp\\source" + datayear + "\\probability2_" + unit + "pieces.csv"; //確率を取得する．
+				filepath = "C:\\Users\\kklab\\Desktop\\yurispace\\integration_cpp\\source" + datayear + "\\probability3_" + unit + "pieces.csv"; //確率を取得する．
 			}
 			probmat = fio.readcsv(filepath, true);
 			filepath = "C:\\Users\\kklab\\Desktop\\yurispace\\integration_cpp\\source" + datayear + "\\Expectations_" + unit + "pieces.csv"; //変動回数を取得する．
