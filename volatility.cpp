@@ -34,32 +34,36 @@ double calc_prob(const int u, const int d, const double p_UU, const double p_UD,
 	p_U = p_DU / (p_UD + p_DU); // 初期分布
 	p_D = p_UD / (p_UD + p_DU); // 初期分布
 	if (d==0) {
-		return p_U * pow(p_UU, (u-1));
+		return p_U * pow(p_UU, u-1);
 	}
 	if (u==0) {
 		return p_D * pow(p_DD, d-1);
 	}
 	if (u > d) {
-		ans = p_D * F.binom(u-1, d-1) * pow(p_UD, d-1) * pow(p_DU, d) * pow(p_UU, u-d);
-		for (k=0; k<=d-1; k++) {
-			ans += p_U * F.binom(d-1, k) * pow(p_UD, k+1) * pow(p_DU, k) * pow(p_UU, u-2-k) * pow(p_DD, d-1-k) * (F.binom(u-1, k)*p_UU + F.binom(u-1, k+1)*p_DU);
-		}
-		for (k=0; k<=d-2; k++) {
-			ans += p_D * F.binom(u-1, k) * pow(p_UD, k) * pow(p_DU, k+1) * pow(p_UU, u-1-k) * pow(p_DD, d-2-k) * (F.binom(d-1, k)*p_DD + F.binom(d-1, k+1)*p_UD);
+		ans = p_U*p_UD*pow(p_UU, u-1)*pow(p_DD, d-1)
+				+ p_U*F.binom(u-1, d)*pow(p_UD, d)*pow(p_DU, d)*pow(p_UU, u-1-d)
+				+ p_D*p_DU*pow(p_UU, u-1)*pow(p_DD, d-1);
+		for (k=1; k<=d-1; k++) {
+			ans += pow(p_UD, k)*pow(p_DU, k)*pow(p_UU, u-1-k)*pow(p_DD, d-1-k)*(
+					F.binom(u-1, k)*F.binom(d-1, k)*p_U*p_UD + F.binom(u-1, k)*F.binom(d-1, k-1)*p_U*p_DD
+					+ F.binom(u-1, k)*F.binom(d-1, k)*p_D*p_DU + F.binom(u-1, k-1)*F.binom(d-1, k)*p_D*p_UU);
 		}
 	} else if (u < d) {
-		ans = p_U * F.binom(d-1, u-1) * pow(p_UD, u) * pow(p_DU, u-1) * pow(p_DD, d-u);
-		for (k=0; k<=u-2; k++) {
-			ans += p_U * F.binom(d-1, k) * pow(p_UD, k+1) * pow(p_DU, k) * pow(p_UU, u-2-k) * pow(p_DD, d-1-k) * (F.binom(u-1, k)*p_UU + F.binom(u-1, k+1)*p_DU);
-		}
-		for (k=0; k<=u-1; k++) {
-			ans += p_D * F.binom(u-1, k) * pow(p_UD, k) * pow(p_DU, k+1) * pow(p_UU, u-1-k) * pow(p_DD, d-2-k) * (F.binom(d-1, k)*p_DD + F.binom(d-1, k+1)*p_UD);
+		ans = p_U*p_UD*pow(p_UU, u-1)*pow(p_DD, d-1)
+				+ p_D*F.binom(d-1, u)*pow(p_UD, u)*pow(p_DU, u)*pow(p_DD, d-1-u)
+				+ p_D*p_DU*pow(p_UU, u-1)*pow(p_DD, d-1);
+		for (k=1; k<=u-1; k++) {
+			ans += pow(p_UD, k)*pow(p_DU, k)*pow(p_UU, u-1-k)*pow(p_DD, d-1-k)*(
+					F.binom(u-1, k)*F.binom(d-1, k)*p_U*p_UD + F.binom(u-1, k)*F.binom(d-1, k-1)*p_U*p_DD
+					+ F.binom(u-1, k)*F.binom(d-1, k)*p_D*p_DU + F.binom(u-1, k-1)*F.binom(d-1, k)*p_D*p_UU);
 		}
 	} else {
-		ans = p_U * pow(p_UD, u) * pow(p_DU, u-1) + p_D * pow(p_UD, u-1) * pow(p_DU, u);
-		for (k=0; k<=u-2; k++) {
-			ans += p_U * F.binom(d-1, k) * pow(p_UD, k+1) * pow(p_DU, k) * pow(p_UU, u-2-k) * pow(p_DD, d-1-k) * (F.binom(u-1, k)*p_UU + F.binom(u-1, k+1)*p_DU);
-			ans += p_D * F.binom(u-1, k) * pow(p_UD, k) * pow(p_DU, k+1) * pow(p_UU, u-1-k) * pow(p_DD, d-2-k) * (F.binom(d-1, k)*p_DD + F.binom(d-1, k+1)*p_UD);
+		ans = p_U*p_UD*pow(p_UU, u-1)*pow(p_DD, u-1)
+				+ p_D*p_DU*pow(p_UU, u-1)*pow(p_DD, u-1);
+		for (k=1; k<=u-1; k++) {
+			ans += pow(p_UD, k)*pow(p_DU, k)*pow(p_UU, u-1-k)*pow(p_DD, u-1-k)*(
+					F.binom(u-1, k)*F.binom(u-1, k)*p_U*p_UD + F.binom(u-1, k)*F.binom(u-1, k-1)*p_U*p_DD
+					+ F.binom(u-1, k)*F.binom(u-1, k)*p_D*p_DU + F.binom(u-1, k-1)*F.binom(u-1, k)*p_D*p_UU);
 		}
 	}
 	return ans;
@@ -147,7 +151,7 @@ double startval(string filepath, bool usequote) {
 int main() {
 
 	string unit = "30";
-	bool observed = false;
+	bool observed = true;
 	string rootpath = "C:\\Users\\kklab\\Desktop\\yurispace\\board_fluctuation\\src\\nikkei_needs_output";
 	string subdir = "\\statistics_of_the_limit_order_book\\move_frequency";
 	string datayear = "\\2007";
@@ -165,7 +169,7 @@ int main() {
 		data = fio.readcsv(filepath, false);
 		vector<double> table(2, 0.0); //期待値と分散を計算する．
 
-		ofstream ofs((dirpath + session + "_" + unit + "unit_volatility.csv").c_str());
+		ofstream ofs((dirpath + session + "_" + unit + "unit_volatility_observed.csv").c_str());
 
 		for (vector<string>::iterator itr=data.begin(); itr!=data.end(); ++itr) {
 			vector<double> vec(2, 0.0);
@@ -194,28 +198,25 @@ int main() {
 			}
 			EX=0.0;
 			VX=0.0;
-			double start = startval(rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", false);
-			for (N=-T; N<=T; N+=2) {
-				up = (T+N)/2;
-				down = (T-N)/2;
-				prob = calc_prob(up, down, p_UU, p_UD, p_DU, p_DD);
-				EX += (log(start + 10.0*N) - log(start)) * prob;
-				VX += (log(start + 10.0*N) - log(start)) * (log(start + 10.0*N) - log(start)) * prob;
+			double pp = 0.0;
+			double start = startval(rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", true);
+			if (T == 0) {
+				VX = 0.0;
+			} else {
+				for (N=-T; N<=T; N+=2) {
+					up = (T+N)/2;
+					down = (T-N)/2;
+					prob = calc_prob(up, down, p_UU, p_UD, p_DU, p_DD);
+					pp += prob;
+					EX += (log(start + 10.0*N) - log(start)) * prob;
+					VX += (log(start + 10.0*N) - log(start)) * (log(start + 10.0*N) - log(start)) * prob;
+				}
+				VX = VX - EX * EX;
 			}
-			VX = VX - EX * EX;
-
+			cout << pp << T << endl;
 			ofs << rowdate
 				<< ","
 				<< VX
-				<< ","
-				<< realized_volatility(60.0,
-					rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", false)
-				<< ","
-				<< realized_volatility(300.0,
-					rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", false)
-				<< ","
-				<< realized_volatility(600.0,
-					rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", false)
 				<< ","
 				<< realized_volatility(60.0,
 					rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", true)
@@ -227,29 +228,6 @@ int main() {
 					rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", true)
 				<<
 				endl;
-			cout << rowdate
-							<< ","
-							<< VX
-							<< ","
-							<< realized_volatility(60.0,
-								rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", false)
-							<< ","
-							<< realized_volatility(300.0,
-								rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", false)
-							<< ","
-							<< realized_volatility(600.0,
-								rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", false)
-							<< ","
-							<< realized_volatility(60.0,
-								rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", true)
-							<< ","
-							<< realized_volatility(300.0,
-								rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", true)
-							<< ","
-							<< realized_volatility(600.0,
-								rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", true)
-							<<
-							endl;
 		}
 	}
 	return 0;
