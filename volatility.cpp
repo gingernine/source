@@ -69,6 +69,16 @@ double calc_prob(const int u, const int d, const double p_UU, const double p_UD,
 	return ans;
 }
 
+double calc_cor(const double p_UU, const double p_UD, const double p_DU, const double p_DD) {
+	/*
+	 *  推移確率が与えられた下で変動の系列相関を計算する．
+	 */
+	double p_U, p_D, ans;
+	p_U = p_DU / (p_UD + p_DU); // 初期分布
+	p_D = p_UD / (p_UD + p_DU); // 初期分布
+	return (p_U*(p_UU-p_UD)-p_D*(p_DU-p_DD)-(p_U-p_D)*(p_U-p_D)) / (p_U+p_D-(p_U-p_D)*(p_U-p_D));
+}
+
 double realized_volatility(double timeint, string filepath, bool usequote) {
 	vector<string> series = fio.readcsv(filepath, false);
 	vector<string>::iterator itr=series.begin();
@@ -160,9 +170,35 @@ int main() {
 
 	string filepath, session, date, rowdate, wfilepath;
 	vector<string> data, probmat, expects;
-	double p_UU, p_UD, p_DU, p_DD, prob, EX, VX;
+	double p_UU, p_UD, p_DU, p_DD, prob, EX, VX, start;
 	int T, up, down, N;
 
+	ofstream ofs((dirpath + "\\volatility_curve.csv").c_str());
+	T = 200;
+
+	for(double x=0.001; x < 1.0; x+=0.001) {
+		cout << x << endl;
+		EX = 0.0;
+		VX = 0.0;
+		start = 17000.0;
+		for(N=-T; N<=T; N+=2) {
+			up = (T+N)/2;
+			down = (T-N)/2;
+			prob = calc_prob(up, down, 1.0-x, x, x, 1.0-x);
+			EX += (log(start + 10.0*N) - log(start)) * prob;
+			VX += (log(start + 10.0*N) - log(start)) * (log(start + 10.0*N) - log(start)) * prob;
+		}
+		VX = VX - EX*EX;
+		ofs << x
+			<< ","
+			<< VX
+			<< ","
+			<< calc_cor(1.0-x, x, x, 1.0-x)
+			<<
+			endl;
+	}
+
+	/*
 	for (int s=0; s<sizeof(sessions)/sizeof(sessions[0]); s++) {
 		session = sessions[s];
 		filepath = dirpath + session + "1min_int.csv";
@@ -199,7 +235,7 @@ int main() {
 			EX=0.0;
 			VX=0.0;
 			double pp = 0.0;
-			double start = startval(rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", true);
+			start = startval(rootpath + datayear + "\\sessionsep" + session + "\\" + date.substr(1,8) + "_.csv", true);
 			if (T == 0) {
 				VX = 0.0;
 			} else {
@@ -230,5 +266,7 @@ int main() {
 				endl;
 		}
 	}
+	*/
+
 	return 0;
 }
