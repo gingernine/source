@@ -174,28 +174,35 @@ int main() {
 	int T, up, down, N;
 
 	ofstream ofs((dirpath + "\\volatility_curve.csv").c_str());
-	T = 200;
-
+	double VXarray[10] = {};
+	int vxitr;
+	ofs << "prob,50,100,150,200,250,300,350,400,450,500,correlation" << endl;
 	for(double x=0.001; x < 1.0; x+=0.001) {
-		cout << x << endl;
-		EX = 0.0;
-		VX = 0.0;
-		start = 17000.0;
-		for(N=-T; N<=T; N+=2) {
-			up = (T+N)/2;
-			down = (T-N)/2;
-			prob = calc_prob(up, down, 1.0-x, x, x, 1.0-x);
-			EX += (log(start + 10.0*N) - log(start)) * prob;
-			VX += (log(start + 10.0*N) - log(start)) * (log(start + 10.0*N) - log(start)) * prob;
+		start = 18000.0;
+		vxitr = 0;
+		for (T=50; T<=500; T+=50) {
+			cout << x << ", " << T <<  endl;
+			EX = 0.0;
+			VX = 0.0;
+			for(N=-T; N<=T; N+=2) {
+				up = (T+N)/2;
+				down = (T-N)/2;
+				prob = calc_prob(up, down, 1.0-x, x, x, 1.0-x);
+				EX += (log(start + 10.0*N) - log(start)) * prob;
+				VX += (log(start + 10.0*N) - log(start)) * (log(start + 10.0*N) - log(start)) * prob;
+			}
+			VXarray[vxitr] = VX - EX*EX;
+			++vxitr;
 		}
-		VX = VX - EX*EX;
-		ofs << x
-			<< ","
-			<< VX
-			<< ","
+
+		ofs << x << ","
+			<< VXarray[0] << "," << VXarray[1] << ","
+			<< VXarray[2] << "," << VXarray[3] << ","
+			<< VXarray[4] << "," << VXarray[5] << ","
+			<< VXarray[6] << "," << VXarray[7] << ","
+			<< VXarray[8] << "," << VXarray[9] << ","
 			<< calc_cor(1.0-x, x, x, 1.0-x)
-			<<
-			endl;
+			<< endl;
 	}
 
 	/*
